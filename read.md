@@ -1,5 +1,7 @@
 
+Test Cidenet
 
-testcidenet (backend) (golang redis)
 
+back/testcidenet (backend) (golang redis)
 
+front/testcidenet (front) (flutter, dart)
