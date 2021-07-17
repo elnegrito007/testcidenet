@@ -97,9 +97,10 @@ func CreateEmployee(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(400)
 				_, _ = w.Write([]byte(`{"e":1,"d":[2]}`))
 			} else {
+				registrys, _ := Connect.Keys("Employee_*_" + firstName + "_" + firstSurname + "_*").Result()
 				t := time.Now().Unix()
 				_ = Connect.Set("Employee_"+dni+"_"+firstName+"_"+firstSurname+"_"+strconv.FormatInt(t, 10), `{"firstSurname":"`+firstSurname+`","secondSurname":"`+secondSurname+`","firstName":"`+firstName+`","otherName":"`+otherName+`","country":"`+country+`","typeDni":"`+typeDni+`","dni":"`+dni+`","country":"`+country+`","area":"`+area+`","date":"`+strconv.FormatInt(t, 10)+`"}`, 0).Err()
-				_, _ = w.Write([]byte(`{"e":0,"d":[200]}`))
+				_, _ = w.Write([]byte(`{"e":0,"d":[200,` + strconv.Itoa(len(registrys)) + `]}`))
 			}
 		}
 	}
@@ -107,15 +108,15 @@ func CreateEmployee(w http.ResponseWriter, r *http.Request) {
 
 func EditEmployee(w http.ResponseWriter, r *http.Request) {
 	firstSurname, secondSurname, firstName, otherName, country, typeDni, dni, dateInit, area, date := r.FormValue("firstSurname"), r.FormValue("secondSurname"), r.FormValue("firstName"), r.FormValue("otherName"), r.FormValue("country"), r.FormValue("typeDni"), r.FormValue("dni"), r.FormValue("dateInit"), r.FormValue("area"), r.FormValue("date")
-	if date == "" || firstSurname == "" || secondSurname == "" || firstName == "" || country == "" || typeDni == "" || dni == "" || dateInit == "" || area == "" || RegTex.MatchString(firstSurname) == false || RegTex.MatchString(secondSurname) == false || RegTex.MatchString(firstName) == false || RegTex.MatchString(country) == false || RegTex.MatchString(typeDni) == false || RegTex.MatchString(area) == false || RegNum.MatchString(dni) == false {
+	if date == "" || firstSurname == "" || secondSurname == "" || firstName == "" || country == "" || typeDni == "" || dni == "" || dateInit == "" || area == "" || RegTex.MatchString(firstSurname) == false || RegTex.MatchString(secondSurname) == false || RegTex.MatchString(firstName) == false || RegNum.MatchString(country) == false || RegNum.MatchString(typeDni) == false || RegNum.MatchString(area) == false || RegNum.MatchString(dni) == false {
 		w.WriteHeader(400)
 		_, _ = w.Write([]byte(`{"e":1,"d":[1]}`))
 	} else {
-		if otherName != "" && RegTex.MatchString(otherName) == false {
+		if otherName != "" && RegTex.MatchString(otherName) == false && len(otherName) > 50 {
 			w.WriteHeader(400)
 			_, _ = w.Write([]byte(`{"e":1,"d":[3]}`))
 		} else {
-			if len(firstSurname) > 20 || len(secondSurname) > 20 || len(firstName) > 20 || (otherName != "" && len(otherName) > 50) {
+			if len(firstSurname) > 20 || len(secondSurname) > 20 || len(firstName) > 20 {
 				w.WriteHeader(400)
 				_, _ = w.Write([]byte(`{"e":1,"d":[2]}`))
 			} else {
@@ -123,8 +124,9 @@ func EditEmployee(w http.ResponseWriter, r *http.Request) {
 				registrys, _ := Connect.Keys("Employee_*_" + date).Result()
 				if len(registrys) > 0 {
 					_ = Connect.Del(registrys[0])
+					registrys2, _ := Connect.Keys("Employee_*_" + firstName + "_" + firstSurname + "_*").Result()
 					_ = Connect.Set("Employee_"+dni+"_"+firstName+"_"+firstSurname+"_"+date, `{"firstSurname":"`+firstSurname+`","secondSurname":"`+secondSurname+`","firstName":"`+firstName+`","otherName":"`+otherName+`","country":"`+country+`","typeDni":"`+typeDni+`","dni":"`+dni+`","country":"`+country+`","area":"`+area+`","date":"`+date+`","edit":"`+strconv.FormatInt(t, 10)+`"}`, 0).Err()
-					_, _ = w.Write([]byte(`{"e":0,"d":[200]}`))
+					_, _ = w.Write([]byte(`{"e":0,"d":[200,` + strconv.Itoa(len(registrys2)) + `]}`))
 				} else {
 					w.WriteHeader(400)
 					_, _ = w.Write([]byte(`{"e":1,"d":[4]}`))

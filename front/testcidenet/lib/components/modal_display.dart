@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:g_json/g_json.dart';
+import 'package:intl/intl.dart';
+import 'package:testcidenet/utils/read_store.dart';
 
 import 'app_intro_lang.dart';
 
@@ -33,16 +35,22 @@ class _ModaldisplayState extends State<Modaldisplay> {
   @override
   Widget build(BuildContext context) {
 
-    for (var iten in valor) {//I/flutter ( 2221): {"firstSurname":"ARIZA","secondSurname":"PEREZ","firtName":"CARLOS","otherName":"","country":"COLOMBIA","typeDni":"CEDULA","dni":"10735722344","area":"CONTABILIDAD","date":"1626382376"}
-      print(iten);
+    for (var iten in valor) {
       final mode = JSON.parse(iten);
+      var date = DateTime.fromMillisecondsSinceEpoch(mode['date'].integerValue * 1000);
+      var formattedDate = DateFormat('dd/MM/yyyy, hh:mm:ss').format(date);
+
       listEmployee.add(
         Container(
           child: Column(
             children: <Widget>[
               Container(
                 margin: EdgeInsets.all(8),
-                child:Text(mode['firstSurname'].stringValue+" "+mode['secondSurname'].stringValue+" "+mode['firtName'].stringValue+" "+mode['otherName'].stringValue)
+                child:Text(mode['firstSurname'].stringValue+" "+mode['secondSurname'].stringValue+" "+mode['firstName'].stringValue+" "+mode['otherName'].stringValue)
+              ),
+              Container(
+                margin: EdgeInsets.all(8),
+                child:Text(mode['typeDni'].stringValue == "1" ? AppLocalizations.of(context).translate('16') : mode['typeDni'].stringValue == "2" ? AppLocalizations.of(context).translate('17') : mode['typeDni'].stringValue == "3" ? AppLocalizations.of(context).translate('18') : AppLocalizations.of(context).translate('19'))
               ),
               Container(
                 margin: EdgeInsets.all(8),
@@ -55,6 +63,18 @@ class _ModaldisplayState extends State<Modaldisplay> {
               Container(
                 margin: EdgeInsets.all(8),
                 child:Text(mode['area'].stringValue == "1" ? AppLocalizations.of(context).translate('23') : mode['area'].stringValue == "2"  ? AppLocalizations.of(context).translate('24') : mode['area'].stringValue == "3" ? AppLocalizations.of(context).translate('25') : mode['area'].stringValue == "4" ? AppLocalizations.of(context).translate('26') : mode['area'].stringValue == "5" ? AppLocalizations.of(context).translate('27') : mode['area'].stringValue == "6" ? AppLocalizations.of(context).translate('28') : AppLocalizations.of(context).translate('29'))
+              ),
+              Container(
+                  margin: EdgeInsets.all(8),
+                child: Text(formattedDate)
+              ),
+              Container(
+                margin: EdgeInsets.all(8),
+                child:ElevatedButton(onPressed: (){
+                  Store.sets("string","edit",iten);
+                  Store.sets("string","edit_id",mode['date'].stringValue);
+                  Navigator.pop(context);
+                }, child: Text(AppLocalizations.of(context).translate('30'))),
               ),
               Divider()
             ],
